@@ -240,6 +240,8 @@ pub fn part2() {
     }
 
     // for the acyclic start, use the naive version of the algorithm.
+    // set acyclic_length to a very big number to brute force the problem
+    //acyclic_length = 10000000;
     if let Err((xxz, res)) = path.iter().cycle().take(acyclic_length).enumerate().try_fold(starts, |c_nodes, (i, instruction)| {
         let next: Vec<_> = c_nodes.iter().map(|node| {
             nodes[node][*instruction as usize].clone()
@@ -259,13 +261,15 @@ pub fn part2() {
     // Now extend the rest using the chinese remainder theorem.
     // Seems like my data only has one endpoint along each cycle, so it's super simple.
     // My data seems even more simple, since all cycles start at the start of the data and finish with the end node xxZ.
-    // -> lcm -> 7_309_459_565_207
-    // -> 7_309_459_565_207 - 1 steps are needed
+    // -> lcm = 7_309_459_565_207 = steps needed
     // However I'm implementing this for general offsets.
     let mut n1 = 1;
     let mut a1 = 0u64;
     for (cycle_ends, _, _, n2) in path_data {
         assert!(cycle_ends.len() == 1, "only implemented for one endpoint per cycle");
+        // for multiple endpoints per cycle, one could go through all
+        // combinations and find the one that happens first. However that
+        // can become really inefficient with many cycle ends.
         let end = cycle_ends[0].0;
         let a2 = (end as i64 - acyclic_length as i64).rem_euclid(n2 as i64) as u64;
         let gcd = gcd(n1, n2 as u64);
@@ -276,12 +280,11 @@ pub fn part2() {
         // in this case do the chinese remainder on a1 (mod n1/gcd), a2 (mod n2/gcd), a1 = a2 =: a3 (mod gcd)
         // which are pairwise coprime. Of course that simplifies to
         // a1 (mod n1), a2 (mod n2/gcd)
-        let (_, m1, _) = xgcd(n1, n2 as u64 / gcd);
-        // careful with the next formula as not all forms hold when gcd isn't 1
+        let (_, m1, _) = xgcd(n1, n2 / gcd);
+        // now compute the combined number (formula from the proof on the wikipage)
         a1 = (a1 as i128 + (a2 as i128 - a1 as i128) * n1 as i128 * m1 as i128).rem_euclid(n) as u64;
         n1 = n as u64;
     }
     a1 += acyclic_length as u64;
-    println!("at most {} steps could be needed with the cycle structure.", n1);
-    println!("{a1} steps are actually needed.");
+    println!("{a1} steps are needed.");
 }
