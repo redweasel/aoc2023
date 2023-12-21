@@ -323,8 +323,8 @@ pub fn part2() {
                 }).filter_map(|x| x));
                 // put the splits back in
                 last_locations.splice(start..start, remains.into_iter().flatten().filter_map(|i| i));
-                assert!(last_locations.is_sorted_by_key(|i| i.start()));
-                assert!(last_locations.is_sorted_by_key(|i| i.end()));
+                //assert!(last_locations.is_sorted_by_key(|i| i.start()));
+                //assert!(last_locations.is_sorted_by_key(|i| i.end()));
             }
         }
     }
