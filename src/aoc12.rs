@@ -85,6 +85,8 @@ additional testing data
 
 */
 
+use std::{collections::HashMap, cell::RefCell, sync::Mutex};
+
 pub fn binom(n: usize, k: usize) -> u128 {
     let mut binom = 1;
     for j in 1..=k as u128 {
@@ -109,9 +111,39 @@ pub fn test_just_questions() {
     for numbers in [[1, 1, 1], [1, 1, 2], [1, 2, 3]] {
         for len in 0..20 {
             // for my old dfs code...
-            assert_eq!(just_questions(len, &numbers), dfs(&"?".repeat(len), &numbers), "failed for len {len} and numbers {numbers:?}");
+            assert_eq!(just_questions(len, &numbers), dfs2(&"?".repeat(len), &numbers), "failed for len {len} and numbers {numbers:?}");
         }
     }
+}
+
+static MEMO: Mutex<RefCell<Option<HashMap<(String, Vec<usize>), u128>>>> = Mutex::new(RefCell::new(None));
+
+// memoization helped very much!!!
+pub fn dfs_memo(line: &str, numbers: &[usize]) -> u128 {
+    let line = line.trim_matches('.');
+    if numbers.iter().sum::<usize>() + numbers.len() > line.len() + 1 {
+        return 0; // the numbers can't fit (anymore)
+    }
+    // check memoized results first
+    let key = (line.to_string(), numbers.to_vec());
+    {
+        let guard = MEMO.lock().expect("failed to lock memo mutex.");
+        let mut map = (*guard).borrow_mut();
+        if let Some(map) = &*map {
+            if let Some(value) = map.get(&key) {
+                return *value;
+            }
+        }
+        else {
+            *map = Some(HashMap::new());
+        }
+    }
+    let count = dfs(line, numbers);
+    // add to the memo{
+    let guard = MEMO.lock().expect("failed to lock memo mutex.");
+    let mut map = (*guard).borrow_mut();
+    (*map).as_mut().unwrap().insert(key, count);
+    count
 }
 
 // depth first search
@@ -122,6 +154,7 @@ pub fn dfs(line: &str, numbers: &[usize]) -> u128 {
     if numbers.iter().sum::<usize>() + numbers.len() > line.len() + 1 {
         return 0; // the numbers can't fit (anymore)
     }
+
     // after the first #, there needs to be a fixed number of # following determined by number
     if let Some((first_index, _)) = line.chars().enumerate().find(|(_, c)| c == &'#') {
         if numbers.len() == 0 {
@@ -167,7 +200,7 @@ pub fn dfs(line: &str, numbers: &[usize]) -> u128 {
                         }
                     }
                     let left = if start > 0 && first_q_index < start-1 {
-                        dfs(&next_line[first_q_index..start-1], &numbers[..i])
+                        dfs_memo(&next_line[first_q_index..start-1], &numbers[..i])
                     }
                     else if i == 0 {
                         1
@@ -176,7 +209,7 @@ pub fn dfs(line: &str, numbers: &[usize]) -> u128 {
                         0
                     };
                     let right = if end+1 < next_line.len() {
-                        dfs(&next_line[end+1..], &numbers[i+1..])
+                        dfs_memo(&next_line[end+1..], &numbers[i+1..])
                     }
                     else if i == numbers.len()-1 {
                         1
@@ -204,7 +237,7 @@ pub fn dfs(line: &str, numbers: &[usize]) -> u128 {
             return 0; // group was longer than expected
         }
         // remove the group and recurse
-        dfs(&line[(next_empty+1).min(line.len())..], &numbers[1..])
+        dfs_memo(&line[(next_empty+1).min(line.len())..], &numbers[1..])
     }
     else if numbers.len() == 0 {
         1 // in these case, following ? need to be ., so only 1 solution
@@ -215,11 +248,11 @@ pub fn dfs(line: &str, numbers: &[usize]) -> u128 {
             let dot_index = first_q_index+1+dot_index;
             // split the rest by . and then go through all combinations in which numbers can be distributed on the sections
             // each of the only ??? sections can be computed directly and then multiplied together.
-            let mut count = dfs(&line[dot_index+1..], numbers);
+            let mut count = dfs_memo(&line[dot_index+1..], numbers);
             for i in 1..=numbers.len() {
                 let left = just_questions(dot_index, &numbers[..i]);
                 if left != 0 {
-                    let right = dfs(&line[dot_index+1..], &numbers[i..]);
+                    let right = dfs_memo(&line[dot_index+1..], &numbers[i..]);
                     count += left * right;
                 }
             }
@@ -232,6 +265,17 @@ pub fn dfs(line: &str, numbers: &[usize]) -> u128 {
     }
     else {
         0
+    }
+}
+
+#[test]
+pub fn test_dfs() {
+    for numbers in [[1, 1, 1], [1, 1, 2], [1, 2, 3]] {
+        for len in 0..20 {
+            assert_eq!(dfs(&"?".repeat(len), &numbers),
+                       dfs2(&"?".repeat(len), &numbers),
+                       "failed for len {len} and numbers {numbers:?}");
+        }
     }
 }
 
@@ -390,6 +434,8 @@ pub fn part2() {
     use std::time::*;
     let start = Instant::now();
 
+    const REPEATS: usize = 5;
+
     let mut sum = 0;
     loop {
         let mut input = String::new();
@@ -401,11 +447,11 @@ pub fn part2() {
         let numbers: &[usize] = &numbers.split(',').map(|n| n.parse::<usize>().ok().expect("failed to parse number")).collect::<Vec<_>>();
         let mut record = record.to_string();
         record.push('?');
-        let record = &record.repeat(5);
+        let record = &record.repeat(REPEATS);
         let record = &record[..record.len()-1];
         //println!("{record}");
-        let numbers = &numbers.repeat(5);
-        let combinations = dfs(record, numbers);
+        let numbers = &numbers.repeat(REPEATS);
+        let combinations = dfs_memo(record, numbers);
         println!("arrangements: {combinations}");
         sum += combinations;
     }
