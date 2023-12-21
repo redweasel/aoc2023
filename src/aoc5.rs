@@ -102,7 +102,7 @@ What is the lowest location number that corresponds to any of the initial seed n
 */
 
 #[test]
-pub fn aoc5_part1() {
+pub fn part1() {
     // idea: make a custom type for the mapping
     // -> assuming the mapping is correct, sort the source list and use binary search for each lookup
     // then read in all the data into the mappings
@@ -111,6 +111,8 @@ pub fn aoc5_part1() {
     // - read in the tables in order and always just convert the current numbers from the last table directly
 
     use std::io;
+    use std::time::Instant;
+    let start = Instant::now();
 
     let mut last_locations = vec![];
     let mut locations = vec![];
@@ -169,6 +171,7 @@ pub fn aoc5_part1() {
     //println!("{locations:?}");
 
     println!("The lowest location number is {}", locations.iter().min().expect("no locations available"));
+    println!("finished in {:?}", Instant::now() - start);
 }
 
 /*
@@ -250,12 +253,14 @@ pub fn volume(v: &Vec<Interval>) -> u64 {
 }
 
 #[test]
-pub fn aoc5_part2() {
+pub fn part2() {
     // actually... the custom type wasn't needed!
     // I now need to consider intervals.
     // -> creating an interval type is the cleanest solution
 
     use std::io;
+    use std::time::Instant;
+    let start = Instant::now();
 
     let mut last_locations = vec![];
     let mut locations = vec![];
@@ -289,6 +294,7 @@ pub fn aoc5_part2() {
                 assert_eq!(volume(&locations), last_location_len);
                 last_locations = locations;
                 last_locations.sort_by_key(|i| i.start); // sort here! last_locations is always sorted!
+                // for optimal performance one would also want to combine touching intervals here, but I omitted that.
                 //println!("{last_locations:?}");
                 locations = vec![];
             }
@@ -327,4 +333,5 @@ pub fn aoc5_part2() {
     //println!("{locations:?}");
 
     println!("The lowest location number is {}", locations.iter().map(|i| i.start()).min().expect("no locations available"));
+    println!("finished in {:?}", Instant::now() - start);
 }

@@ -26,7 +26,7 @@ Consider your entire calibration document. What is the sum of all of the calibra
 */
 
 #[test]
-fn aoc1_part1() {
+pub fn part1() {
     use std::io;
 
     let mut sum = 0;
@@ -64,7 +64,7 @@ What is the sum of all of the calibration values?
 */
 
 #[test]
-fn aoc1_part2() {
+pub fn part2() {
     use std::io;
 
     let mut sum = 0;

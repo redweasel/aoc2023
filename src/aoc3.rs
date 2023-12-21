@@ -131,7 +131,7 @@ pub fn read_numbers(line: &str) -> NumberIterator {
 }
 
 #[test]
-fn aoc3_part1() {
+pub fn part1() {
     // idea: still go line by line, but this time keep the last line around
     // then do:
     // 1. check if unused numbers from the last line match parts of the current line
@@ -291,7 +291,7 @@ impl Gear {
 }
 
 #[test]
-fn aoc3_part2() {
+pub fn part2() {
     // idea: do it in a scan like in last solution but use 3 lines here.
     // start with 2 empty lines
     // 1. read the 3 lines simultaneously and detect numbers like before

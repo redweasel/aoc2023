@@ -38,7 +38,7 @@ Take a seat in the large pile of colorful cards. How many points are they worth 
 */
 
 #[test]
-pub fn aoc4_part1() {
+pub fn part1() {
     use std::io;
     use std::collections::HashSet;
 
@@ -100,7 +100,7 @@ Process all of the original and copied scratchcards until no more scratchcards a
 */
 
 #[test]
-pub fn aoc4_part2() {
+pub fn part2() {
     use std::io;
     use std::collections::HashSet;
     use std::collections::VecDeque;

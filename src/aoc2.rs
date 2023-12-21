@@ -29,7 +29,7 @@ Determine which games would have been possible if the bag had been loaded with o
 */
 
 #[test]
-fn aoc2_part1() {
+pub fn part1() {
     use std::io;
 
     const ALLOWED_PER_COLOR: [u32; 3] = [12, 13, 14];
@@ -114,7 +114,7 @@ For each game, find the minimum set of cubes that must have been present. What i
 */
 
 #[test]
-fn aoc2_part2() {
+pub fn part2() {
     use std::io;
 
     let mut sum = 0;
