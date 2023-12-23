@@ -355,8 +355,6 @@ For each brick, determine how many other bricks would fall if that brick were di
 
 #[test]
 pub fn part2() {
-    // 66039 too high
-
     use std::io;
 
     let mut blocks = vec![];
