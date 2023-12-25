@@ -74,22 +74,10 @@ use std::hash::Hash;
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct Point(pub isize, pub isize);
 
-impl std::ops::Add for Point {
-    type Output = Point;
-    fn add(self, rhs: Self) -> Self::Output {
-        Point(self.0 + rhs.0, self.1 + rhs.1)
-    }
-}
 impl std::ops::Sub for Point {
     type Output = Point;
     fn sub(self, rhs: Self) -> Self::Output {
         Point(self.0 - rhs.0, self.1 - rhs.1)
-    }
-}
-
-impl Point {
-    pub fn in_bounds(&self, width: usize, height: usize) -> bool {
-        self.0 >= 0 && self.1 >= 0 && (self.0 as usize) < width && (self.1 as usize) < height
     }
 }
 
